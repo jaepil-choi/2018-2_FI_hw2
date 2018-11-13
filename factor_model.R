@@ -4,12 +4,14 @@
 ######################
 
 Sys.setlocale("LC_ALL", "korean")
+rm(list = ls())
 
 library(dplyr)
 library(xts)
 library(quantmod)
 library(httr) # web scraping
 library(rvest)
+library(PerformanceAnalytics)
 
 ###############
 ### import data
@@ -25,7 +27,7 @@ ff3$date <- as.Date.character(ff3$date, "%Y%m%d")
 ff3xts <- xts(ff3[,-1],ff3[,1])
 View(ff3xts)
 
-## S&P500 list from Wikipedia
+## Scrape S&P500 list from Wikipedia
 url <- "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
 res <- GET(url)
 wiki <- read_html(res)
@@ -34,7 +36,7 @@ fcodes <- unlist(c(wiki_table[[1]][1]), use.names=FALSE)
 fcodes
 length(fcodes) # More than 500 in S&P500 because of different share classes. => 505 
 
-## Stock data of S&P500
+## Get stock data of S&P500 from Yahoo Finance.(It takes some time)
 # However, there may be 'hindsight(survivorship) bias' in this selection. (Current S&P 500 firms are survivors)
 SP500 <- NULL
 start_date <- "2015-01-01"
@@ -72,10 +74,30 @@ View(df) # Time series data of top 100 stocks. (2015-1-01-01 ~ 2018-10-10)
 ### Merge portfolio return with FF3
 ###################################
 
+## Daily portfolio return 
 portfolio_daily <- dailyReturn(df)
+View(portfolio_daily)
+table.Stats(portfolio_daily)
+table.AnnualizedReturns(portfolio_daily, scale=252)
 
+## Merge with FF3 (no lag applied yet.)
+merged_data <- merge(portfolio_daily, ff3xts, join='left')
+merged_data <- na.omit(merged_data)
+View(merged_data)
 
 #########################
 ### Run regression on FF3
 #########################
+
+
+
+
+
+
+
+
+
+
+
+
 

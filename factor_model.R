@@ -16,11 +16,12 @@ library(rvest)
 ###############
 
 ## Fama-French 3 Factor
-ff3 <- read.delim("F-F_Benchmark_Factors_Monthly.txt", sep="", header=TRUE) # => from 1926.07 ~ 2018.09
-dim(ff3)[1] # => 1105
-colnames(ff3)[2] <- 'Rm_Rf'
+ff3 <- read.csv("F-F_Research_Data_Factors_daily.csv", skip=4) # => from 1926.07.01 ~ 2018.09.28
 colnames(ff3)[1] <- 'date'
-ff3$date <- as.yearmon(as.character(ff3$date), format="%Y%m") # yearmon format, => Jul 1926 ////as.Date는 date까지 필요하다. 
+colnames(ff3)[2] <- 'Rm_Rf'
+ff3 <- ff3[-nrow(ff3),]
+dim(ff3)[1] # => 24328
+ff3$date <- as.Date.character(ff3$date, "%Y%m%d")
 ff3xts <- xts(ff3[,-1],ff3[,1])
 View(ff3xts)
 
@@ -34,7 +35,7 @@ fcodes
 length(fcodes) # More than 500 in S&P500 because of different share classes. => 505 
 
 ## Stock data of S&P500
-# However, there might be 'hindsight bias' in this selection. (Current S&P 500 firms are survivors)
+# However, there may be 'hindsight(survivorship) bias' in this selection. (Current S&P 500 firms are survivors)
 SP500 <- NULL
 start_date <- "2015-01-01"
 for (f in fcodes) {
